@@ -1,0 +1,362 @@
+
+.logo {
+  width: 80px;       /* ancho del contenedor del logo */
+  height: 80px;      /* alto del contenedor del logo */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.logo-img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain; /* evita que se deforme */
+}
+
+
+
+
+
+
+
+
+/* ----------------------
+   🎨 Variables globales y reset
+   ----------------------*/
+/* Variables de color, sombras y tipografía global para todo el sitio */
+:root {
+  --red:#fdcc16;                 /* Rojo principal: botones, acentos, precios */
+  --muted:#f6f6f7;               /* Gris claro para fondos secundarios */
+  --glass: rgba(255,255,255,0.06); /* Transparencia tipo "glass" */
+  --card: rgba(255,255,255,0.04);  /* Fondo tarjetas */
+  --text:#0f1720;                /* Texto base oscuro (para fondos claros, usado solo en body) */
+  --soft:#e9e9ea;                /* Gris suave para detalles secundarios */
+  --accent: rgba(255,45,45,0.12); /* Rojo suave para hover, acentos */
+  --shadow: 0 8px 30px rgba(2,6,23,0.35); /* Sombra general para tarjetas y elementos flotantes */
+  --glass-border: rgba(255,255,255,0.08); /* Bordes translúcidos */
+  font-family: 'Poppins', system-ui, Arial, sans-serif;
+}
+
+/* Reset de box-sizing y altura */
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+
+/* Body: fondo degradado oscuro, tipografía, smoothing y scroll vertical */
+body {
+  margin: 0;
+  background: linear-gradient(180deg,#0b0b0c 0%, #0f1113 50%);
+  color: var(--text);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-y: auto;
+}
+
+/* ----------------------
+   🌌 Fondo animado (efecto “futurista”)
+   ----------------------*/
+/* Clase: .bg-canvas  
+   Ubicación: se pone como primer elemento dentro de body  
+   Función: genera manchas de luz animadas con blur y saturación para efecto futurista */
+.bg-canvas {
+  position: fixed;
+  inset: 0;
+  z-index: -2;
+  pointer-events: none;
+  background: radial-gradient(600px 400px at 10% 20%, rgba(255,45,45,0.08), transparent 10%),
+              radial-gradient(500px 300px at 90% 80%, rgba(255,45,45,0.06), transparent 8%);
+  animation: bgmove 18s linear infinite;
+  filter: blur(10px) saturate(120%);
+}
+/* Animación de movimiento vertical para fondo */
+@keyframes bgmove {
+  0% { transform: translateY(0); }
+  50% { transform: translateY(-30px); }
+  100% { transform: translateY(0); }
+}
+
+/* ----------------------
+   📐 Layout general
+   ----------------------*/
+/* .wrap: contenedor principal que envuelve header, main y footer */
+.wrap { display: flex; flex-direction: column; min-height: 100vh; }
+
+/* main: sección principal de contenido (hero, planes, equipos) */
+main { padding: 18px; display: flex; flex-direction: column; gap: 18px; }
+
+/* footer: pie de página con copyright u info adicional */
+footer { padding: 18px; text-align: center; color: rgba(255,255,255,0.6); }
+
+/* ----------------------
+   🔝 Header (barra superior con logo y marca)
+   ----------------------*/
+/* header.app-hero: barra superior fija con blur y degradado */
+header.app-hero {
+  padding: 28px 18px;
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  justify-content: space-between;
+  background: linear-gradient(180deg, rgba(255,255,255,0.02), transparent);
+  border-bottom: 1px solid rgba(255,255,255,0.03);
+  backdrop-filter: blur(6px) saturate(120%);
+  box-shadow: inset 0 -1px 0 rgba(255,255,255,0.02);
+}
+
+/* .brand: contenedor del logo y nombre */
+.brand { display: flex; align-items: center; gap: 12px; }
+
+
+
+/* Texto del nombre de la marca */
+.brand h1 { font-size: 16px; margin: 0; color: white; font-weight: 600; }
+/* Texto secundario (slogan o detalle) */
+.brand p { margin: 0; font-size: 12px; color: rgba(255,255,255,0.7); }
+
+/* ----------------------
+   🪄 Hero / Introducción
+   ----------------------*/
+/* .hero-card: tarjeta principal de bienvenida o promoción */
+.hero-card {
+  border-radius: 14px;
+  padding: 18px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--shadow);
+  color: white;
+  position: relative;
+  overflow: hidden;
+}
+
+/* .hero-grid: organiza el contenido del hero en filas flexibles */
+.hero-grid { display: flex; gap: 12px; align-items: center; }
+
+/* .hero-left: columna izquierda con título y texto */
+.hero-left { flex: 1; }
+.hero-left h2 { margin: 0 0 6px 0; font-size: 20px; }
+.hero-left p { margin: 0 0 12px 0; color: rgba(255,255,255,0.8); }
+
+/* .cta-row: fila de botones call-to-action dentro del hero */
+.cta-row { display: flex; gap: 10px; }
+
+/* ----------------------
+   🔘 Botones
+   ----------------------*/
+.btn {
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: 0;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all .28s cubic-bezier(.2,.9,.3,1);
+}
+
+/* Botón principal: rojo degradado, sombra */
+.btn-primary {
+  background: linear-gradient(90deg,var(--red), #ff6161);
+  color: white;
+  box-shadow: 0 12px 30px rgba(255,45,45,0.14);
+}
+
+/* Botón secundario transparente */
+.btn-ghost {
+  background: transparent;
+  color: white;
+  border: 1px solid rgba(255,255,255,0.08);
+}
+
+/* Efecto hover de todos los botones */
+.btn:hover { transform: translateY(-3px); }
+
+/* ----------------------
+   💳 Tarjetas de planes / membresías
+   ----------------------*/
+/* Contenedor de cards */
+.cards { display: grid; grid-template-columns: 1fr; gap: 12px; }
+
+/* Cada tarjeta individual */
+.card-plan {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: center;
+  padding: 14px;
+  border-radius: 12px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+  border: 1px solid rgba(255,255,255,0.03);
+  transition: transform .28s ease, box-shadow .28s ease;
+}
+/* Hover de la tarjeta (flotante / efecto 3D) */
+.card-plan:hover {
+  transform: translateY(-8px) rotateX(3deg);
+  box-shadow: 0 30px 60px rgba(2,6,23,0.44);
+}
+
+/* Contenido de la tarjeta */
+.plan-info h3 { margin:0; color:white; }      /* Nombre del plan */
+.plan-info p { margin:4px 0 0 0; color:rgba(255,255,255,0.75); } /* Descripción */
+.plan-meta { text-align:right; }              /* Datos a la derecha */
+.price { font-weight:700; color: var(--red); } /* Precio destacado */
+
+/* ----------------------
+   ⚙️ Grid de equipos / instalaciones
+   ----------------------*/
+.grid-eq { display: grid; grid-template-columns: repeat(2,1fr); gap: 10px; }
+
+/* Cada bloque de equipo */
+.equip {
+  padding: 12px;
+  border-radius: 10px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.02));
+  border: 1px solid rgba(255,255,255,0.03);
+  color: white;
+}
+
+/* ----------------------
+   📦 Modales / ventanas emergentes
+   ----------------------*/
+/* Fondo oscuro con blur para centrar el modal */
+.modal-backdrop,
+.modal-overlay {
+  position: fixed;
+  inset: 0;                      /* ocupa toda la pantalla */
+  background: rgba(0,0,0,0.6);   /* oscurece fondo */
+  backdrop-filter: blur(8px);    /* efecto desenfoque */
+  display: flex;                 /* centra modal con flex */
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+/* Caja del modal */
+.modal {
+  width: 94%; max-width: 520px;
+  border-radius: 16px;
+  padding: 20px;
+  background: rgba(255,255,255,0.1);
+  border: 1px solid rgba(255,255,255,0.2);
+  backdrop-filter: blur(20px);
+  color: #fff;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+}
+
+/* Contenedor de filas dentro del formulario del modal */
+.form-row { display: flex; flex-direction: column; gap: 8px; }
+
+/* ----------------------
+   ✍️ Inputs y formularios
+   ----------------------*/
+.input {
+  background: transparent;
+  border: 1px solid rgba(255,255,255,0.3);
+  padding: 10px;
+  border-radius: 8px;
+  color: #fff;  /* texto dentro del input */
+}
+.input option {
+  background: #222;  /* fondo de opciones desplegables */
+  color: #fff;       /* texto de opciones desplegables */
+}
+
+/* ----------------------
+   📱 Responsive / Desktop
+   ----------------------*/
+@media (min-width:720px){
+  .cards { grid-template-columns: repeat(2,1fr); }   /* 2 columnas de planes en tablet/desktop */
+  .grid-eq { grid-template-columns: repeat(3,1fr); } /* 3 columnas de equipos */
+}
+
+/* ----------------------
+   ⭐ Extras y estados
+   ----------------------*/
+/* Focus accesible en botones e inputs */
+button:focus, .input:focus {
+  outline: 2px solid rgba(255,45,45,0.18);
+  outline-offset: 2px;
+}
+
+/* Texto pequeño auxiliar (por ejemplo micro info en cards) */
+.micro { font-size: 12px; color: rgba(255,255,255,0.6); }
+
+
+
+
+
+
+
+
+
+
+
+
+/* Fondo desenfocado cuando hay modal */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.4);
+  backdrop-filter: blur(6px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  opacity: 0;
+  animation: fadeIn 0.3s forwards;
+}
+
+.modal {
+  background: #111;
+  border-radius: 16px;
+  padding: 20px;
+  width: 90%;
+  max-width: 500px;
+  box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+  transform: scale(0.95);
+  transition: all 0.3s ease;
+}
+
+.modal-backdrop .modal {
+  transform: scale(1);
+}
+
+.input {
+  width: 100%;
+  padding: 8px 12px;
+  margin-bottom: 8px;
+  border-radius: 12px;
+  border: 1px solid #333;
+  background: #222;
+  color: #fff;
+}
+
+.btn {
+  border-radius: 12px;
+  transition: all 0.2s ease;
+}
+
+.btn:hover {
+  opacity: 0.9;
+}
+
+@keyframes fadeIn {
+  to { opacity: 1; }
+}
+
+
+
+body, html {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+.background-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: url('../img/fondo/gymprime.png') no-repeat center center;
+   background-size: 95%; /* tamaño inicial más pequeño que cover */
+  z-index: -1;
+  background-color:#13142a;
+  filter: blur(7px) brightness(0.7); /* Opcional: blur y oscurecer */
+}

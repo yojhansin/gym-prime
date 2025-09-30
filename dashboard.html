@@ -1,0 +1,84 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dashboard Gimnasio</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+
+<div class="background-container"></div>
+
+<div class="wrap">
+
+  <!-- Header -->
+<header class="app-hero">
+  <div class="brand">
+    <div class="logo">
+      <img src="assets/img/logo/logoprime.png" alt="Logo Gymprime" class="logo-img">
+    </div>
+    <div>
+      <h1>Gymprime</h1>
+      <p class="micro">gestión gymprime</p>
+    </div>
+  </div>
+  <div class="cta-row">
+    <button class="btn btn-ghost" onclick="location.href='index.html'">Volver</button>
+  </div>
+</header>
+   
+
+  <main>
+    <!-- Métricas -->
+    <section class="hero-card">
+      <h3 style="color:var(--red)">Resumen General</h3>
+      <div id="dash-metrics" style="display:flex; gap:12px; flex-wrap:wrap;">
+        <!-- Total clientes, planes, cupos -->
+      </div>
+    </section>
+
+    <!-- Planes -->
+    <section class="hero-card">
+      <h3 style="color:var(--red)">Planes Disponibles</h3>
+      <div id="dash-plans" class="cards"></div>
+      <div style="margin-top:10px">
+        <button class="btn btn-primary" onclick="openPlanForm()">Agregar Nuevo Plan</button>
+      </div>
+    </section>
+
+    <!-- Reservas -->
+    <section class="hero-card">
+      <h3 style="color:var(--red)">Alumnos Ingresados</h3>
+      <div id="dash-bookings" style="max-height:300px; overflow:auto;"></div>
+    </section>
+
+<!-- Ejercicios -->
+<section class="hero-card">
+  <h3 style="color:var(--red)">Ejercicios</h3>
+  <div id="dash-exercises" class="cards"></div>
+  <div style="margin-top:10px;">
+    <button class="btn btn-primary" onclick="openExerciseForm()">Agregar Nuevo Ejercicio</button>
+  </div>
+</section>
+
+
+
+
+  </main>
+
+  <footer>
+    <div class="micro">© <span id="year"></span> Gimnasio — Dashboard</div>
+  </footer>
+
+</div>
+
+<!-- Modales dinámicos -->
+<div id="modals-root"></div>
+
+<script src="assets/js/dashboard.js"></script>
+</body>
+</html>
+

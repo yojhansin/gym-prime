@@ -1,0 +1,264 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Gym prime - demo</title>
+  <meta name="description" content="Landing y gestión básica para gimnasio — minimalista, futurista, mobile-first, HTML/CSS/JS nativo"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/style.css">
+  <base href="./">
+</head>
+<body>
+  <div class="background-container"></div>
+
+  <div class="bg-canvas" aria-hidden="true"></div>
+  <div class="wrap">
+<header class="app-hero">
+  <div class="brand">
+    <div class="logo">
+      <img src="assets/img/logo/logoprime.png" alt="Logo Gymprime" class="logo-img">
+    </div>
+    <div>
+      <h1>Gymprime</h1>
+      <p class="micro">gestión gymprime</p>
+    </div>
+  </div>
+  <div class="cta-row">
+    <a href="dashboard.html" class="btn btn-primary">panel</a>
+  </div>
+</header>
+
+
+    <main>
+      <!-- Dashboard Métricas -->
+      <section id="dashboard-stats" class="hero-card">
+        <div id="dash-metrics" style="display:flex; gap:12px; flex-wrap:wrap;"></div>
+      </section>
+
+      <!-- Planes -->
+      <section id="planes">
+        <h3 style="color:var(--red); margin:6px 0 8px 0;">Planes</h3>
+        <div class="cards" id="plans-list" role="list">
+          <!-- Plan cards via JS -->
+        </div>
+      </section> 
+    </main>
+
+    <footer>
+      <div class="micro">© <span id="year"></span> Gimnasio — Diseño demo </div>
+    </footer>
+  </div>
+
+  <!-- Modales (inserción dinámica) -->
+  <div id="modals-root"></div>
+
+<div id="modals-root"></div> <!-- Este debe estar en tu index -->
+
+<script>
+  // ----- DB Helpers -----
+  function dbGet(k, fallback){ 
+    try{ 
+      const r=localStorage.getItem(k); 
+      return r? JSON.parse(r): fallback 
+    }catch(e){ return fallback } 
+  }
+  function dbSet(k,v){ localStorage.setItem(k, JSON.stringify(v)) }
+
+  // ----- Inicialización DB -----
+  const DEFAULT_PLANS = [
+    { id:'p1', name:'Mensual - Básico', price:19900, slots:30, desc:'Acceso libre al gym por 1 mes' },
+    { id:'p2', name:'3 Meses - Popular', price:49900, slots:18, desc:'Mejor precio y 1 clase incluida/mes' },
+    { id:'p3', name:'Anual - Premium', price:149900, slots:6, desc:'Acceso ilimitado + 2 sesiones PT/mes' }
+  ];
+
+  if(!dbGet('gym_plans')) dbSet('gym_plans', DEFAULT_PLANS);
+  if(!dbGet('gym_bookings')) dbSet('gym_bookings', []);
+
+  // ----- Helpers -----
+  const money = v => new Intl.NumberFormat('es-CL',{style:'currency',currency:'CLP',maximumFractionDigits:0}).format(v);
+  const root = id => document.getElementById(id);
+
+  // ----- Modales personalizados -----
+  function showAlert(message){
+    const root = document.getElementById('modals-root'); 
+    root.innerHTML='';
+    const backdrop = document.createElement('div'); 
+    backdrop.className='modal-backdrop';
+    const modal = document.createElement('div'); 
+    modal.className='modal';
+    modal.innerHTML = `
+      <p class="micro">${message}</p>
+      <div style="display:flex; justify-content:flex-end; margin-top:10px;">
+        <button class="btn btn-primary" id="alert-ok">OK</button>
+      </div>
+    `;
+    backdrop.appendChild(modal);
+    root.appendChild(backdrop);
+    document.getElementById('alert-ok').onclick = ()=> root.innerHTML='';
+    backdrop.addEventListener('click', e => { if(e.target===backdrop) root.innerHTML=''; });
+  }
+
+  function showConfirmModal(message, onConfirm){
+    const root = document.getElementById('modals-root'); 
+    root.innerHTML='';
+    const backdrop = document.createElement('div'); 
+    backdrop.className='modal-backdrop';
+    const modal = document.createElement('div'); 
+    modal.className='modal';
+    modal.innerHTML = `
+      <h3 style="color:var(--red); margin-top:0">Confirmación</h3>
+      <p class="micro">${message}</p>
+      <div style="display:flex; gap:8px; justify-content:flex-end; margin-top:10px;">
+        <button class="btn btn-primary" id="confirm-yes">Sí</button>
+        <button class="btn btn-ghost" id="confirm-no">No</button>
+      </div>
+    `;
+    backdrop.appendChild(modal);
+    root.appendChild(backdrop);
+
+    document.getElementById('confirm-no').onclick = ()=> root.innerHTML='';
+    document.getElementById('confirm-yes').onclick = ()=>{
+      root.innerHTML='';
+      onConfirm();
+    }
+
+    backdrop.addEventListener('click', e => { if(e.target===backdrop) root.innerHTML=''; });
+  }
+
+  // ----- Render Métricas -----
+  function renderMetrics(){
+    const metrics = root('dash-metrics');
+    const plans = dbGet('gym_plans', []);
+    const bookings = dbGet('gym_bookings', []);
+    const totalSlots = plans.reduce((acc,p)=>acc+(p.slots||0),0);
+    const totalClients = bookings.length;
+
+    metrics.innerHTML = `
+      <div class="hero-card" style="flex:1; min-width:120px; text-align:center">
+        <strong>Total Clientes</strong>
+        <div style="font-size:20px; font-weight:700; color:var(--red)">${totalClients}</div>
+      </div>
+      <div class="hero-card" style="flex:1; min-width:120px; text-align:center">
+        <strong>Planes Disponibles</strong>
+        <div style="font-size:20px; font-weight:700; color:var(--red)">${plans.length}</div>
+      </div>
+      <div class="hero-card" style="flex:1; min-width:120px; text-align:center">
+        <strong>Cupos Totales</strong>
+        <div style="font-size:20px; font-weight:700; color:var(--red)">${totalSlots}</div>
+      </div>
+    `;
+  }
+
+  // ----- Render Plans con alumnos y cupos -----
+  function renderPlans(){
+    const list = root('plans-list'); list.innerHTML='';
+    const plans = dbGet('gym_plans', []);
+    const bookings = dbGet('gym_bookings', []);
+
+    plans.forEach(p=>{
+      const enrolled = bookings.filter(b=>b.planId===p.id).length;
+      const remainingSlots = Math.max(0, (p.slots||0) - enrolled);
+
+      const el = document.createElement('div'); 
+      el.className='card-plan'; 
+      el.setAttribute('role','listitem');
+      el.innerHTML = `
+        <div class="plan-info">
+          <h3>${p.name}</h3>
+          <p class="micro">${p.desc}</p>
+        </div>
+        <div class="plan-meta">
+          <div class="price">${money(p.price)}</div>
+          <div class="micro">Cupos restantes: <strong>${remainingSlots}</strong></div>
+          <div class="micro">Alumnos inscritos: <strong>${enrolled}</strong></div>
+          <div style="margin-top:10px; display:flex; gap:8px; justify-content:flex-end">
+            <button class="btn btn-primary" onclick="quickBuy('${p.id}')">Agregar alumno</button>
+            <button class="btn btn-danger" onclick="deletePlan('${p.id}')">Eliminar plan</button>
+          </div>
+        </div>
+      `;
+      list.appendChild(el);
+    });
+  }
+
+  // ----- Modales de Booking -----
+  function openModal(type, data){
+    const root = document.getElementById('modals-root'); root.innerHTML='';
+    const backdrop = document.createElement('div'); backdrop.className='modal-backdrop';
+    const modal = document.createElement('div'); modal.className='modal';
+
+    if(type==='book'){
+      modal.innerHTML = `
+        <h3 style="color:var(--red); margin-top:0">Agregar Alumno</h3>
+        <div class="form-row">
+          <label class="micro">Plan</label>
+          <select id="book-plan" class="input"></select>
+          <input id="book-name" class="input" placeholder="Nombre del alumno" />
+          <input id="book-email" class="input" placeholder="Correo" />
+          <div style="display:flex; gap:8px">
+            <button class="btn btn-primary" id="btn-send">Confirmar</button>
+            <button class="btn btn-ghost" id="btn-cancel">Cancelar</button>
+          </div>
+        </div>
+      `;
+      backdrop.appendChild(modal); root.appendChild(backdrop);
+
+      const sel = document.getElementById('book-plan'); 
+      const plans = dbGet('gym_plans', []);
+      plans.forEach(p=>{ 
+        const o = document.createElement('option'); 
+        o.value=p.id; 
+        o.textContent=`${p.name} — ${money(p.price)} (${p.slots} cupos)`; 
+        sel.appendChild(o) 
+      });
+
+      document.getElementById('btn-cancel').onclick = ()=>root.innerHTML='';
+      document.getElementById('btn-send').onclick = function(){
+        const pid = sel.value;
+        const name = document.getElementById('book-name').value.trim();
+        const email = document.getElementById('book-email').value.trim();
+        if(!name||!email) return showAlert('Completa nombre y correo');
+
+        const bookings = dbGet('gym_bookings', []);
+        bookings.unshift({ id:'b'+Date.now(), planId:pid, name, email, created:new Date().toISOString(), status:'pendiente' });
+        dbSet('gym_bookings', bookings);
+
+        renderPlans(); 
+        renderMetrics();
+        showAlert('Alumno agregado'); 
+        root.innerHTML='';
+      }
+    }
+
+    backdrop.addEventListener('click', e=>{ if(e.target===backdrop) root.innerHTML=''; });
+  }
+
+  function quickBuy(planId){ 
+    openModal('book'); 
+    setTimeout(()=>{ document.getElementById('book-plan').value = planId; },50);
+    setTimeout(()=>{ document.getElementById('book-name').focus(); },150);
+  }
+
+  // ----- Eliminar plan -----
+  function deletePlan(planId){
+    showConfirmModal('¿Seguro quieres eliminar este plan?', ()=>{
+      const plans = dbGet('gym_plans', []);
+      const bookings = dbGet('gym_bookings', []);
+      dbSet('gym_plans', plans.filter(p=>p.id!==planId));
+      dbSet('gym_bookings', bookings.filter(b=>b.planId!==planId));
+      renderPlans();
+      renderMetrics();
+    });
+  }
+
+  // ----- Inicialización -----
+  renderPlans();
+  renderMetrics();
+  document.getElementById('year').textContent = new Date().getFullYear();
+</script>
+
+</body>
+</html>
