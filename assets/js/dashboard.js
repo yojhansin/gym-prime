@@ -153,8 +153,8 @@ function openBookingEdit(id){
     <h3 style="color:var(--red)">Editar Alumno</h3>
     <input id="edit-name" class="input" placeholder="Nombre" value="${b.name}" />
     <input id="edit-email" class="input" placeholder="Email" value="${b.email}" />
-    <input id="edit-fechaIngreso" class="input" type="date" value="${b.fechaIngreso||''}" />
-    <input id="edit-fechaPago" class="input" type="date" value="${b.fechaPago||''}" />
+    <input id="edit-fechaIngreso" class="input" type="text" value="${b.fechaIngreso||''}" />
+    <input id="edit-fechaPago" class="input" type="text" value="${b.fechaPago||''}" />
     <select id="edit-status" class="input">
       <option value="pendiente" ${b.status==='pendiente'?'selected':''}>Pendiente</option>
       <option value="completado" ${b.status==='completado'?'selected':''}>Completado</option>
@@ -463,5 +463,6 @@ renderMetrics();
 renderPlans();
 renderBookings();
 renderExercises();
+
 
 
