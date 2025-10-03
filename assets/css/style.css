@@ -366,25 +366,14 @@ body, html {
 }
 
 
-.input {
-  width: 100%;
-  box-sizing: border-box;
+/* Solo inputs de fecha dentro de los modales */
+.modal input[type="date"] {
+  width: 100%;       /* Ocupa todo el ancho disponible */
+  box-sizing: border-box; /* Incluye padding y border dentro del ancho */
+  font-size: 16px;   /* Tamaño de texto legible en móviles */
+  padding: 6px 10px; /* Ajusta el espacio interno */
 }
 
-input[type="date"] {
-  width: 100%;
-  box-sizing: border-box;
-}
 
-@media (max-width: 480px) {
-  .modal .input {
-    font-size: 16px;
-    padding: 8px 10px;
-  }
-  .form-row > input,
-  .form-row > select {
-    width: 100%;
-  }
-}
 
 
