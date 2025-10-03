@@ -366,13 +366,16 @@ body, html {
 }
 
 
-/* Solo inputs de fecha dentro de los modales */
+/* Inputs de fecha en el modal */
 .modal input[type="date"] {
-  width: 100%;       /* Ocupa todo el ancho disponible */
+  display: block;       /* Forzar que se comporte como bloque */
+  width: 100% !important; /* Ocupa todo el ancho del contenedor */
+  max-width: 100%;      /* Que nunca se desborde */
   box-sizing: border-box; /* Incluye padding y border dentro del ancho */
-  font-size: 16px;   /* Tamaño de texto legible en móviles */
-  padding: 6px 10px; /* Ajusta el espacio interno */
+  font-size: 16px;      /* Legible en móviles */
+  padding: 6px 10px;
 }
+
 
 
 
