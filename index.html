@@ -31,31 +31,28 @@
   </div>
 </header>
 
+<main>
+  <!-- Dashboard Métricas -->
+  <section id="dashboard-stats" class="hero-card">
+    <div id="dash-metrics" style="display:flex; gap:12px; flex-wrap:wrap;"></div>
+  </section>
 
-    <main>
-      <!-- Dashboard Métricas -->
-      <section id="dashboard-stats" class="hero-card">
-        <div id="dash-metrics" style="display:flex; gap:12px; flex-wrap:wrap;"></div>
-      </section>
+  <!-- Planes -->
+  <section id="planes">
+    <h3 style="color:var(--red); margin:6px 0 8px 0;">Planes</h3>
+    <div class="cards" id="plans-list" role="list">
+      <!-- Plan cards via JS -->
+    </div>
+  </section> 
+</main>
 
-      <!-- Planes -->
-      <section id="planes">
-        <h3 style="color:var(--red); margin:6px 0 8px 0;">Planes</h3>
-        <div class="cards" id="plans-list" role="list">
-          <!-- Plan cards via JS -->
-        </div>
-      </section> 
-    </main>
+<footer>
+  <div class="micro">© <span id="year"></span> Gimnasio — Diseño demo </div>
+</footer>
+</div>
 
-    <footer>
-      <div class="micro">© <span id="year"></span> Gimnasio — Diseño demo </div>
-    </footer>
-  </div>
-
-  <!-- Modales (inserción dinámica) -->
-  <div id="modals-root"></div>
-
-<div id="modals-root"></div> <!-- Este debe estar en tu index -->
+<!-- Modales (inserción dinámica) -->
+<div id="modals-root"></div>
 
 <script>
   // ----- DB Helpers -----
@@ -128,29 +125,35 @@
     backdrop.addEventListener('click', e => { if(e.target===backdrop) root.innerHTML=''; });
   }
 
-  // ----- Render Métricas -----
   function renderMetrics(){
-    const metrics = root('dash-metrics');
-    const plans = dbGet('gym_plans', []);
-    const bookings = dbGet('gym_bookings', []);
-    const totalSlots = plans.reduce((acc,p)=>acc+(p.slots||0),0);
-    const totalClients = bookings.length;
+  const metrics = root('dash-metrics');
+  const plans = dbGet('gym_plans', []);
+  const bookings = dbGet('gym_bookings', []);
 
-    metrics.innerHTML = `
-      <div class="hero-card" style="flex:1; min-width:120px; text-align:center">
-        <strong>Total Clientes</strong>
-        <div style="font-size:20px; font-weight:700; color:var(--red)">${totalClients}</div>
-      </div>
-      <div class="hero-card" style="flex:1; min-width:120px; text-align:center">
-        <strong>Planes Disponibles</strong>
-        <div style="font-size:20px; font-weight:700; color:var(--red)">${plans.length}</div>
-      </div>
-      <div class="hero-card" style="flex:1; min-width:120px; text-align:center">
-        <strong>Cupos Totales</strong>
-        <div style="font-size:20px; font-weight:700; color:var(--red)">${totalSlots}</div>
-      </div>
-    `;
-  }
+  const totalClients = bookings.length;
+
+  // Calcular cupos restantes sumando plan por plan
+  const totalSlotsRestantes = plans.reduce((acc, plan) => {
+    const inscritos = bookings.filter(b => b.planId === plan.id).length;
+    return acc + Math.max(0, (plan.slots || 0) - inscritos);
+  }, 0);
+
+  metrics.innerHTML = `
+    <div class="hero-card" style="flex:1; min-width:120px; text-align:center">
+      <strong>Total Alumnos</strong>
+      <div style="font-size:20px; font-weight:700; color:var(--red)">${totalClients}</div>
+    </div>
+    <div class="hero-card" style="flex:1; min-width:120px; text-align:center">
+      <strong>Cupos Restantes</strong>
+      <div style="font-size:20px; font-weight:700; color:var(--red)">${totalSlotsRestantes}</div>
+    </div>
+    <div class="hero-card" style="flex:1; min-width:120px; text-align:center">
+      <strong>Planes Disponibles</strong>
+      <div style="font-size:20px; font-weight:700; color:var(--red)">${plans.length}</div>
+    </div>
+  `;
+}
+
 
   // ----- Render Plans con alumnos y cupos -----
   function renderPlans(){
@@ -184,7 +187,7 @@
     });
   }
 
-  // ----- Modales de Booking -----
+  // ----- Modales de Booking con fechas -----
   function openModal(type, data){
     const root = document.getElementById('modals-root'); root.innerHTML='';
     const backdrop = document.createElement('div'); backdrop.className='modal-backdrop';
@@ -194,11 +197,22 @@
       modal.innerHTML = `
         <h3 style="color:var(--red); margin-top:0">Agregar Alumno</h3>
         <div class="form-row">
-          <label class="micro">Plan</label>
+          <label class="micro" for="book-plan">Plan</label>
           <select id="book-plan" class="input"></select>
-          <input id="book-name" class="input" placeholder="Nombre del alumno" />
-          <input id="book-email" class="input" placeholder="Correo" />
-          <div style="display:flex; gap:8px">
+
+          <label class="micro" for="book-name">Nombre del alumno</label>
+          <input id="book-name" class="input" placeholder="Ingresa el nombre del alumno" />
+
+          <label class="micro" for="book-email">Correo electrónico</label>
+          <input id="book-email" class="input" placeholder="Ingresa el correo del alumno" />
+
+          <label class="micro" for="book-date">Fecha de ingreso:</label>
+          <input id="book-date" type="date" class="input" />
+
+          <label class="micro" for="book-payment">Fecha de pago:</label>
+          <input id="book-payment" type="date" class="input" />
+
+          <div style="display:flex; gap:8px; margin-top:8px">
             <button class="btn btn-primary" id="btn-send">Confirmar</button>
             <button class="btn btn-ghost" id="btn-cancel">Cancelar</button>
           </div>
@@ -220,10 +234,22 @@
         const pid = sel.value;
         const name = document.getElementById('book-name').value.trim();
         const email = document.getElementById('book-email').value.trim();
+        const date = document.getElementById('book-date').value;
+        const paymentDate = document.getElementById('book-payment').value;
+
         if(!name||!email) return showAlert('Completa nombre y correo');
 
         const bookings = dbGet('gym_bookings', []);
-        bookings.unshift({ id:'b'+Date.now(), planId:pid, name, email, created:new Date().toISOString(), status:'pendiente' });
+        bookings.unshift({ 
+  id:'b'+Date.now(), 
+  planId:pid, 
+  name, 
+  email, 
+  fechaIngreso: date,     // Fecha de ingreso
+  fechaPago: paymentDate, // Fecha de pago
+  status:'pendiente' 
+});
+
         dbSet('gym_bookings', bookings);
 
         renderPlans(); 
