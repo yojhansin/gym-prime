@@ -355,24 +355,28 @@ function openExerciseDetail(id){
   const backdrop=document.createElement('div'); backdrop.className='modal-backdrop';
   const modal=document.createElement('div'); modal.className='modal'; modal.style.maxWidth='600px';
 
-  modal.innerHTML=`
-    <h3 style="color:var(--red)">${ex.name}</h3>
-    <p class="micro">${ex.desc||''}</p>
-    <div id="ex-records" style="max-height:200px; overflow:auto; margin-bottom:10px;">
-      ${(ex.records||[]).map((r,i)=>`
-        <div style="border-bottom:1px solid rgba(255,255,255,0.05); padding:6px 0; display:flex; justify-content:space-between; align-items:center;">
-          <span><strong>${r.student}</strong> - ${r.weight} kg (${r.date})</span>
+modal.innerHTML=`
+  <h3 style="color:var(--red)">${ex.name}</h3>
+  <p class="micro">${ex.desc||''}</p>
+  <div id="ex-records" style="max-height:200px; overflow:auto; margin-bottom:10px;">
+    ${(ex.records||[]).map((r,i)=>`
+      <div style="border-bottom:1px solid rgba(255,255,255,0.05); padding:6px 0; display:flex; justify-content:space-between; align-items:center;">
+        <span><strong>${r.student}</strong> - ${r.weight} kg (${r.date})</span>
+        <div style="display:flex; gap:4px;">
           <button class="btn btn-ghost btn-sm" onclick="openRecordEditModal('${ex.id}', ${i})">Editar</button>
+          <button class="btn btn-primary btn-sm" onclick="deleteExerciseRecord('${ex.id}', ${i})">Eliminar</button>
         </div>
-      `).join('')||'<div class="micro">Sin registros</div>'}
-    </div>
-    <input id="rec-student" class="input" placeholder="Alumno" />
-    <input id="rec-weight" class="input" placeholder="Peso (kg)" type="number"/>
-    <div style="margin-top:10px; display:flex; gap:8px;">
-      <button class="btn btn-primary" id="rec-save">Registrar</button>
-      <button class="btn btn-ghost" id="rec-close">Cerrar</button>
-    </div>
-  `;
+      </div>
+    `).join('')||'<div class="micro">Sin registros</div>'}
+  </div>
+  <input id="rec-student" class="input" placeholder="Alumno" />
+  <input id="rec-weight" class="input" placeholder="Peso (kg)" type="number"/>
+  <div style="margin-top:10px; display:flex; gap:8px;">
+    <button class="btn btn-primary" id="rec-save">Registrar</button>
+    <button class="btn btn-ghost" id="rec-close">Cerrar</button>
+  </div>
+`;
+
   backdrop.appendChild(modal); root.appendChild(backdrop);
 
   document.getElementById('rec-close').onclick=()=>root.innerHTML='';
@@ -430,6 +434,21 @@ function openRecordEditModal(exId, recordIndex){
   backdrop.addEventListener('click', e=>{ if(e.target===backdrop) root.innerHTML=''; });
 }
 
+function deleteExerciseRecord(exId, recordIndex){
+  showConfirmModal('¿Eliminar este alumno del ejercicio?', ()=>{
+    const exercises = dbGet('gym_exercises', []);
+    const ex = exercises.find(e=>e.id===exId);
+    if(!ex) return;
+    ex.records.splice(recordIndex, 1);
+    const idx = exercises.findIndex(e=>e.id===exId);
+    exercises[idx] = ex;
+    dbSet('gym_exercises', exercises);
+    openExerciseDetail(exId);
+  });
+}
+
+
+
 function deleteExercise(id){
   showConfirmModal('¿Eliminar ejercicio?', function(){
     const exercises = dbGet('gym_exercises', []).filter(ex=>ex.id!==id);
@@ -463,6 +482,7 @@ renderMetrics();
 renderPlans();
 renderBookings();
 renderExercises();
+
 
 
 
