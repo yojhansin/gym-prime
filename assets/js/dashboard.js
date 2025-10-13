@@ -12,6 +12,11 @@ function dbSet(k,v){
   localStorage.setItem(k, JSON.stringify(v)) 
 }
 
+
+//agrupacion de ejercicio spor musculo 
+const MUSCLE_GROUPS = ['Pecho','Espalda','Piernas','Hombros','Bíceps','Tríceps','Abdomen','Cardio'];
+
+
 // ================= Inicialización DB =================
 const DEFAULT_PLANS = [
   { id:'p1', name:'Mensual - Básico', price:19900, slots:30, desc:'Acceso libre al gym por 1 mes' },
@@ -315,29 +320,38 @@ function openExerciseForm(exercise=null){
   const root=document.getElementById('modals-root'); root.innerHTML='';
   const backdrop=document.createElement('div'); backdrop.className='modal-backdrop';
   const modal=document.createElement('div'); modal.className='modal';
+
   modal.innerHTML=`
     <h3 style="color:var(--red)">${exercise?'Editar Ejercicio':'Nuevo Ejercicio'}</h3>
     <input id="ex-name" class="input" placeholder="Nombre del ejercicio" value="${exercise?.name||''}" />
     <textarea id="ex-desc" class="input" placeholder="Descripción" rows="2">${exercise?.desc||''}</textarea>
+    <select id="ex-group" class="input">
+      ${MUSCLE_GROUPS.map(g => `
+        <option value="${g}" ${exercise?.group===g?'selected':''}>${g}</option>
+      `).join('')}
+    </select>
     <div style="margin-top:10px; display:flex; gap:8px;">
       <button class="btn btn-primary" id="ex-save">Guardar</button>
       <button class="btn btn-ghost" id="ex-cancel">Cancelar</button>
     </div>
   `;
+
   backdrop.appendChild(modal); root.appendChild(backdrop);
 
   document.getElementById('ex-cancel').onclick = ()=>root.innerHTML='';
   document.getElementById('ex-save').onclick = ()=>{
     const name = document.getElementById('ex-name').value.trim();
     const desc = document.getElementById('ex-desc').value.trim();
+    const group = document.getElementById('ex-group').value;
+
     if(!name) return alert('Nombre requerido');
 
     let exercises = dbGet('gym_exercises', []);
     if(exercise){
       const idx = exercises.findIndex(e=>e.id===exercise.id);
-      exercises[idx] = {...exercises[idx], name, desc};
+      exercises[idx] = {...exercises[idx], name, desc, group};
     } else {
-      exercises.unshift({id:'ex'+Date.now(), name, desc, records:[]});
+      exercises.unshift({id:'ex'+Date.now(), name, desc, group, records:[]});
     }
     dbSet('gym_exercises', exercises);
     root.innerHTML='';
@@ -482,6 +496,7 @@ renderMetrics();
 renderPlans();
 renderBookings();
 renderExercises();
+
 
 
 
