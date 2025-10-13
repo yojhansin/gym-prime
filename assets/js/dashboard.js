@@ -326,9 +326,7 @@ function openExerciseForm(exercise=null){
     <input id="ex-name" class="input" placeholder="Nombre del ejercicio" value="${exercise?.name||''}" />
     <textarea id="ex-desc" class="input" placeholder="Descripción" rows="2">${exercise?.desc||''}</textarea>
     <select id="ex-group" class="input">
-      ${MUSCLE_GROUPS.map(g => `
-        <option value="${g}" ${exercise?.group===g?'selected':''}>${g}</option>
-      `).join('')}
+      ${MUSCLE_GROUPS.map(g => `<option value="${g}" ${exercise?.group===g?'selected':''}>${g}</option>`).join('')}
     </select>
     <div style="margin-top:10px; display:flex; gap:8px;">
       <button class="btn btn-primary" id="ex-save">Guardar</button>
@@ -360,6 +358,7 @@ function openExerciseForm(exercise=null){
 
   backdrop.addEventListener('click', e=>{ if(e.target===backdrop) root.innerHTML=''; });
 }
+
 
 function openExerciseDetail(id){
   const exercises = dbGet('gym_exercises', []);
@@ -410,6 +409,59 @@ modal.innerHTML=`
 
   backdrop.addEventListener('click', e=>{ if(e.target===backdrop) root.innerHTML=''; });
 }
+
+
+
+
+
+function renderExercises(){
+  const exercises = dbGet('gym_exercises', []);
+  const root = document.getElementById('dash-exercises');
+  if(!root) return;
+  root.innerHTML = '';
+
+  if(exercises.length === 0){
+    root.innerHTML = '<p class="micro">No hay ejercicios registrados.</p>';
+    return;
+  }
+
+  // Agrupar por grupo muscular
+  const groups = {};
+  exercises.forEach(ex => {
+    const g = ex.group || 'Sin grupo';
+    if(!groups[g]) groups[g] = [];
+    groups[g].push(ex);
+  });
+
+  // Dibujar cada grupo
+  for(const gName in groups){
+    const groupDiv = document.createElement('div');
+    groupDiv.className = 'exercise-group';
+    groupDiv.innerHTML = `<h4 style="margin-top:10px; color:var(--red)">${gName}</h4>`;
+    
+    groups[gName].forEach(ex => {
+      const exDiv = document.createElement('div');
+      exDiv.className = 'exercise-item';
+      exDiv.style.display = 'flex';
+      exDiv.style.justifyContent = 'space-between';
+      exDiv.style.alignItems = 'center';
+      exDiv.style.borderBottom = '1px solid rgba(255,255,255,0.05)';
+      exDiv.style.padding = '4px 0';
+      
+      exDiv.innerHTML = `
+        <span>${ex.name}</span>
+        <div style="display:flex; gap:4px;">
+          <button class="btn btn-ghost btn-sm" onclick="openExerciseDetail('${ex.id}')">Ver</button>
+          <button class="btn btn-primary btn-sm" onclick="deleteExercise('${ex.id}')">Eliminar</button>
+        </div>
+      `;
+      groupDiv.appendChild(exDiv);
+    });
+
+    root.appendChild(groupDiv);
+  }
+}
+
 
 function openRecordEditModal(exId, recordIndex){
   const exercises = dbGet('gym_exercises', []);
@@ -496,6 +548,7 @@ renderMetrics();
 renderPlans();
 renderBookings();
 renderExercises();
+
 
 
 
